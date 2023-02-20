@@ -1,0 +1,154 @@
+-----------------------------GRAPHICAL METHOD
+clc
+clear all
+format short
+%%phase 1: Input parameter
+%c=[2 1]
+A=[1 2;1 1;0 1];
+B=[2000;1500;600];
+c=[3,5];
+%%phase 2: Plotting the graph
+y1=0:1:max(B);
+x11=(B(1)-A(1,1)*y1)/A(1,2);
+x21=(B(2)-A(2,1)*y1)/A(2,2);
+x31=(B(3)-A(3,1)*y1)/A(3,2);
+x11=max(0,x11);
+x21=max(0,x21);
+x31=max(0,x31);
+plot(y1,x11,'r',y1,x21,'b',y1,x31,'g');
+title('x1 vs x2');
+xlabel('Value of  of x:');
+ylabel('Value of y: ');
+legend('x1+2x2=2000','x1+x2=1500','x2=600');
+%%grid on
+%%phase 3: find corner point with axes
+cx1=find(y1==0)
+c1=find(x11==0)
+c2=find(x21==0)
+c3=find(x31==0)
+a1 = [ y1(:,[c1 cx1]) ; x11(:,[c1 cx1]) ]'
+a2 = [ y1(:,[c2 cx1]); x21(:,[c2 cx1]) ]'
+a3 = [ y1(:,[c3 cx1]); x31(:,[c3 cx1]) ]'
+corner_points=unique([a1;a2;a3],'rows')
+%%phase 4: to find points of intersection
+points=[0;0];
+for i=1:size(A,1)
+    A1=A(i,:);
+    B1=B(i,:);
+    for j=i+1:size(A,1)
+        A2=A(j,:);
+        B2=B(j,:);
+        Af=[A1;A2];
+        Bf=[B1;B2];
+        X=inv(Af)*Bf;
+        points=[points X];
+    end
+end
+points'
+%phase 5: write all corner points
+all_points=[points';corner_points];
+X=unique(all_points,'rows');
+%phase 6: find feasibile region
+x1=X(:,1);
+x2=X(:,2);
+con1=x1+2*x2-2000;
+h1=find(con1>0);
+X(h1,:)=[];
+x1=X(:,1);
+x2=X(:,2);
+con2=x1+x2-1500;
+h2=find(con2>0);
+X(h2,:)=[];
+x1=X(:,1);
+x2=X(:,2);
+con3=x2-600;
+h3=find(con3>0);
+X(h3,:)=[];
+p=X;
+%p  %to print feasibile region points
+%phase 7: find maxima
+max=0;
+m1=0;
+m2=0;
+for i=1:size(p)
+     obj=3*p(i,1)+5*p(i,2);
+     if(obj>max)
+         max=obj;
+         m1=p(i,1);
+         m2=p(i,2);
+     end
+end
+max
+m1
+m2
+
+%to plot region
+plot(y1,x11,'r',y1,x21,'b',y1,x31,'g');
+title('x1 vs x2');
+xlabel('Value of  of x:');
+ylabel('Value of y: ');
+legend('x1+2x2=2000','x1+x2=1500','x2=600');
+hold on;
+patch(p(:,1),p(:,2),'r')
+
+
+
+
+------------------STANDARD FORM
+clc
+clear all
+%c=[2 1]
+A=[1 2; 1 1; 0 1];
+B=[2000; 1500;  600];
+c = [3 5];
+ineqsign=[0, 0, 1];
+s=eye(size(A,1));
+index=find(ineqsign>0)
+s(index,:)=-s(index,:)
+objfunc=array2table(c,'VariableNames',{'x1','x2'})
+
+
+objfunc1=array2table(s)
+objfunc1.Properties.VariableNames(1:size(s,2))={'s_1','s_2','s_3'}
+objfunc2=array2table(A)
+objfunc2.Properties.VariableNames(1:size(A,2))={'x_1','x_2'}
+objfunc3=array2table(B)
+objfunc3.Properties.VariableNames(1:size(B,2))={'b_1'}
+T=[objfunc2,objfunc1,objfunc3]
+
+
+
+
+------------------------Basic Feasible 
+
+clc
+clear all
+A=[2 9 -1 9 ; 1 5 0 -1]; % write in standard form
+C=[5 8 0 4];
+b=[8; 7];
+n=size(A,2);
+m=size(A,1);
+if n>m
+nCm=nchoosek(n,m); %  Total no. of Basic solution
+p=nchoosek(1:n,m); % Pairs of basic solution
+sol=[]; % Default  solution is zero 
+for i=1:nCm
+     y=zeros(n,1);
+    A1=A(:,p(i,:));
+    X=inv(A1)*b;
+    % Feasibility condition
+     if all(X>=0 & X~=inf & X~=-inf)
+    y(p(i,:))=X;
+    sol=[sol y]
+    end
+end
+else 
+    error('No of variables are less than constraints');
+end
+% Objective function
+Z=C*sol;
+% Find the optimal  value
+[obj,index]=max(Z);
+BFS=sol(:,index);
+
+-------------------------------------------
